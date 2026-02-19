@@ -1,81 +1,76 @@
-🏙 UrbanLens
+# 🏙 UrbanLens
 
-AI-Powered Hyperlocal Civic Issue Detection & Mapping System
+**AI-Powered Hyperlocal Civic Issue Detection & Mapping System**
 
-UrbanLens is a mobile-first civic-tech application built using React Native that enables users to detect, report, and visualize urban infrastructure issues such as potholes, garbage overflow, streetlight failures, and water leakage. The system integrates geolocation, interactive mapping, and analytics to support data-driven urban monitoring.
+UrbanLens is a mobile-first civic-tech application built using **React Native** that enables users to detect, report, and visualize urban infrastructure issues such as potholes, garbage overflow, streetlight failures, and water leakage. The system integrates geolocation, interactive mapping, and analytics to support data-driven urban monitoring.
 
-🚀 Features
+---
 
-📸 Report civic issues with image capture
+## 🚀 Features
 
-📍 Automatic GPS-based location tagging
+- 📸 Report civic issues with image capture  
+- 📍 Automatic GPS-based location tagging  
+- 🗺 Interactive India map centered on Bengaluru  
+- 🔥 Heatmap visualization for issue density  
+- 🎯 Severity classification (Low, Medium, High)  
+- 📊 Analytics dashboard with trends & distribution  
+- 👤 Dynamic user authentication & profile display  
+- 🎛 Filters by issue type and status (Pending, In Progress, Resolved)  
 
-🗺 Interactive India map centered on Bengaluru
+---
 
-🔥 Heatmap visualization for issue density
+## 🧠 Tech Stack
 
-🎯 Severity classification (Low, Medium, High)
+### Frontend
+- React Native (CLI)  
+- React Navigation  
+- React Native Maps  
+- Async Storage  
 
-📊 Analytics dashboard with trends & distribution
+### Mapping
+- Google Maps / Mapbox integration  
+- Marker clustering  
+- Heatmap overlays  
 
-👤 Dynamic user authentication & profile display
+### Backend (Phase 2+)
+- Firebase / Node.js + Express  
+- MongoDB / Firestore  
+- Cloud image storage  
 
-🎛 Filters by issue type and status (Pending, In Progress, Resolved)
+### Machine Learning (Planned)
+- TensorFlow / PyTorch  
+- TensorFlow Lite for on-device inference  
+- Lightweight image classification model  
 
-🧠 Tech Stack
+---
 
-Frontend
+## 📍 Map Configuration
 
-React Native (CLI)
+**Default Map Center:**
+- Latitude: `12.9716`  
+- Longitude: `77.5946`  
+- Region: Bengaluru, India  
 
-React Navigation
+**Supports:**
+- Issue markers  
+- Clustering  
+- Severity color coding  
+- Status filtering  
+- Heatmap layer  
 
-React Native Maps
+---
 
-Async Storage
+## 🔮 Roadmap
 
-Mapping
+- ✅ Phase 1: Mobile-first issue reporting & visualization  
+- 🔄 Phase 2: Backend integration with Firebase/Node.js  
+- 🔮 Phase 3: On-device ML inference for automated issue classification  
 
-Google Maps / Mapbox integration
+---
 
-Marker clustering
+## 📜 License
 
-Heatmap overlays
+This project is licensed under the MIT License.  
+Feel free to use, modify, and distribute with attribution.
 
-Backend (Phase 2+)
-
-Firebase / Node.js + Express
-
-MongoDB / Firestore
-
-Cloud image storage
-
-Machine Learning (Planned)
-
-TensorFlow / PyTorch
-
-📍 Map Configuration
-
-Default map center:
-
-Latitude: 12.9716
-
-Longitude: 77.5946
-
-Region: Bengaluru, India
-
-Supports:
-
-Issue markers
-
-Clustering
-
-Severity color coding
-
-Status filtering
-
-Heatmap layer
-
-TensorFlow Lite for on-device inference
-
-Lightweight image classification model
+---
