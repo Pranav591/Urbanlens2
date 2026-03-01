@@ -86,7 +86,7 @@ UrbanLens is a mobile-first civic-tech application that empowers citizens to det
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/urbanlens.git
+git clone https://github.com/nish-debug15/UrbanLens.git
 cd urbanlens
 
 # Install dependencies
