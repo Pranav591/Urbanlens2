@@ -1,96 +1,61 @@
+// src/utils/theme.js
+// Rich dark theme — deep navy base, vivid electric accents
+// Inspired by: what's running on device + Citizen/Linear/Vercel dark palette
+
 export const theme = {
   colors: {
-    // Background gradient stops (used with LinearGradient or layered Views)
-    gradA:         '#060B1A',   // deepest navy-black
-    gradB:         '#0D1B3E',   // deep navy
-    gradC:         '#0F2460',   // mid navy-indigo
-    gradD:         '#1A1040',   // indigo-purple
+    // ── Backgrounds ──
+    bg:          '#0A0F1E',   // deepest navy-black (page bg)
+    surface:     '#111827',   // slightly lifted (card bg)
+    surfaceHigh: '#1A2235',   // even more lifted (nested cards)
+    surfaceBorder:'#1E2D45',  // subtle borders on dark surface
 
-    // Glass surface colors (semi-transparent)
-    glassWhite:    'rgba(255,255,255,0.10)',   // primary glass card
-    glassWhiteMid: 'rgba(255,255,255,0.14)',   // hovered/focused glass
-    glassWhiteHi:  'rgba(255,255,255,0.20)',   // strong glass (hero stats)
-    glassDark:     'rgba(0,0,0,0.25)',          // dark glass overlay
+    // ── Nav / Header ──
+    nav:         '#080D1A',   // darkest — app bar, tab bar
+    navBorder:   'rgba(255,255,255,0.07)',
 
-    // Glass borders (the "edge light" effect)
-    glassBorder:   'rgba(255,255,255,0.18)',
-    glassBorderHi: 'rgba(255,255,255,0.35)',
-    glassInner:    'rgba(255,255,255,0.06)',    // inner highlight
+    // ── Primary accent — electric indigo/blue ──
+    accent:      '#4F6EF7',   // vivid indigo-blue
+    accentDark:  '#3B56D4',
+    accentSoft:  'rgba(79,110,247,0.18)',
+    accentGlow:  'rgba(79,110,247,0.40)',
 
-    // Accent - electric blue (primary CTA)
-    blue:          '#3B82F6',
-    blueBright:    '#60A5FA',
-    blueGlow:      'rgba(59,130,246,0.45)',
-    blueSoft:      'rgba(59,130,246,0.15)',
+    // ── Semantic ──
+    green:       '#22C55E',
+    greenDark:   '#16A34A',
+    greenSoft:   'rgba(34,197,94,0.15)',
+    red:         '#EF4444',
+    redDark:     '#DC2626',
+    redSoft:     'rgba(239,68,68,0.15)',
+    orange:      '#F59E0B',
+    orangeDark:  '#D97706',
+    orangeSoft:  'rgba(245,158,11,0.15)',
+    teal:        '#06B6D4',
+    tealSoft:    'rgba(6,182,212,0.15)',
+    purple:      '#A855F7',
+    purpleSoft:  'rgba(168,85,247,0.15)',
 
-    // Accent - violet (secondary)
-    violet:        '#7C3AED',
-    violetBright:  '#A78BFA',
-    violetGlow:    'rgba(124,58,237,0.40)',
-    violetSoft:    'rgba(124,58,237,0.15)',
+    // ── Live ──
+    live:        '#22C55E',
+    liveSoft:    'rgba(34,197,94,0.18)',
 
-    // Accent - teal (tertiary / live)
-    teal:          '#06B6D4',
-    tealGlow:      'rgba(6,182,212,0.40)',
-    tealSoft:      'rgba(6,182,212,0.15)',
+    // ── Text ──
+    textPrimary:   '#F1F5FF',
+    textSecondary: 'rgba(200,215,255,0.65)',
+    textTertiary:  'rgba(160,185,240,0.40)',
+    textInverse:   '#0A0F1E',
 
-    // Live indicator
-    live:          '#22C55E',
-    liveSoft:      'rgba(34,197,94,0.20)',
-
-    // Semantic
-    green:         '#10B981',
-    greenSoft:     'rgba(16,185,129,0.18)',
-    greenBright:   '#34D399',
-    red:           '#EF4444',
-    redSoft:       'rgba(239,68,68,0.18)',
-    redBright:     '#F87171',
-    orange:        '#F59E0B',
-    orangeSoft:    'rgba(245,158,11,0.18)',
-    orangeBright:  '#FCD34D',
-
-    // Text on dark glass
-    textPrimary:   '#F0F4FF',
-    textSecondary: 'rgba(224,232,255,0.70)',
-    textTertiary:  'rgba(196,210,255,0.45)',
-    textInverse:   '#060B1A',
-
-    // Aliases
-    accent:     '#3B82F6',
-    accentSoft: 'rgba(59,130,246,0.15)',
+    // ── Borders & dividers ──
+    border:      'rgba(255,255,255,0.08)',
+    borderStrong:'rgba(255,255,255,0.14)',
   },
 
-  radius: { xs: 6, sm: 12, md: 18, lg: 24, xl: 32, full: 999 },
+  radius: { xs: 6, sm: 10, md: 14, lg: 18, xl: 24, full: 999 },
 
-  // Glow shadows for glass elements
   shadow: {
-    card: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.35,
-      shadowRadius: 20,
-      elevation: 10,
-    },
-    blue: {
-      shadowColor: '#3B82F6',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.55,
-      shadowRadius: 14,
-      elevation: 8,
-    },
-    violet: {
-      shadowColor: '#7C3AED',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.50,
-      shadowRadius: 14,
-      elevation: 8,
-    },
-    teal: {
-      shadowColor: '#06B6D4',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.50,
-      shadowRadius: 12,
-      elevation: 7,
-    },
+    card:   { shadowColor: '#000', shadowOffset: { width: 0, height: 4 },  shadowOpacity: 0.4, shadowRadius: 12, elevation: 5 },
+    accent: { shadowColor: '#4F6EF7', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.5, shadowRadius: 14, elevation: 7 },
+    green:  { shadowColor: '#22C55E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 5 },
+    red:    { shadowColor: '#EF4444', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 5 },
   },
 };
