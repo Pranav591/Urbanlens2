@@ -1,4 +1,4 @@
-# 🏙️ UrbanLens
+# UrbanLens
 ### AI-Powered Hyperlocal Civic Issue Detection & Mapping System
 
 > Report it. Map it. Fix it.
@@ -7,13 +7,13 @@ UrbanLens is a mobile-first civic-tech application that empowers citizens to det
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 > *(Coming soon — Phase 1 build in progress)*
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |--------|-------------|
@@ -30,7 +30,7 @@ UrbanLens is a mobile-first civic-tech application that empowers citizens to det
 
 ---
 
-## 🧠 Tech Stack
+## Tech Stack
 
 ### Frontend
 - **React Native** (CLI)
@@ -56,7 +56,7 @@ UrbanLens is a mobile-first civic-tech application that empowers citizens to det
 
 ---
 
-## 📍 Map Configuration
+## Map Configuration
 
 | Parameter | Value |
 |-----------|-------|
@@ -73,7 +73,7 @@ UrbanLens is a mobile-first civic-tech application that empowers citizens to det
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -118,7 +118,7 @@ FIREBASE_API_KEY=your_firebase_key_here    # Phase 2
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 urbanlens/
@@ -138,7 +138,7 @@ urbanlens/
 
 ---
 
-## 🗂️ Issue Data Model
+## Issue Data Model
 
 ```json
 {
@@ -162,7 +162,7 @@ urbanlens/
 
 ---
 
-## 🔮 Roadmap
+## Roadmap
 
 - ✅ **Phase 1** — Mobile-first issue reporting, GPS tagging, interactive map, heatmap, severity filters, analytics dashboard
 - 🔄 **Phase 2** — Backend integration (Firebase/Node.js), cloud image storage, user auth, real-time sync
@@ -170,7 +170,7 @@ urbanlens/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -184,7 +184,7 @@ Please make sure your code follows the existing style and all tests pass before 
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
