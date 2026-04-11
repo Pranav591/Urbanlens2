@@ -1,0 +1,58 @@
+export const theme = {
+  colors: {
+    background: '#0B1220',
+    surface: '#111827',
+    elevated: '#1F2937',
+    navBackground: '#0A0F1A',
+    border: '#2A3446',
+
+    blue: '#3B82F6',
+    indigo: '#6366F1',
+    green: '#22C55E',
+    amber: '#F59E0B',
+    red: '#EF4444',
+    cyan: '#06B6D4',
+    purple: '#A855F7',
+
+    textPrimary: '#FFFFFF',
+    textSecondary: '#9CA3AF',
+    textMuted: 'rgba(255,255,255,0.5)',
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+  },
+  radius: {
+    card: 16,
+    button: 12,
+    pill: 999,
+    input: 12,
+    icon: 10,
+  },
+  typography: {
+    title: { fontSize: 26, fontWeight: '700', color: '#FFFFFF' },
+    sectionHeader: { fontSize: 18, fontWeight: '600', color: '#FFFFFF' },
+    cardTitle: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+    body: { fontSize: 14, color: '#FFFFFF' },
+    meta: { fontSize: 12, color: '#9CA3AF' },
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  issueTypes: {
+    pothole: { emoji: '🕳️', color: '#EF4444', label: 'Pothole' },
+    garbage: { emoji: '🗑️', color: '#F59E0B', label: 'Garbage' },
+    streetlight: { emoji: '💡', color: '#EAB308', label: 'Streetlight' },
+    flooding: { emoji: '🌊', color: '#06B6D4', label: 'Flooding' },
+    graffiti: { emoji: '🖌️', color: '#A855F7', label: 'Graffiti' },
+    other: { emoji: '⚠️', color: '#6366F1', label: 'Other' },
+  },
+};
