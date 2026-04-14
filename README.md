@@ -1,97 +1,170 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🚀 UrbanLens
 
-# Getting Started
+UrbanLens is a **React Native mobile application** that allows users to **report real-world issues** like potholes, traffic jams, accidents, construction, etc., with **location and photo evidence**, and view them on an interactive map.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## 📱 Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### 🔐 Authentication
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+* Login / Signup
+* Guest login option
+* Auto-login using local storage
+* Logout functionality
 
-```sh
-# Using npm
-npm start
+### 📝 Issue Reporting
 
-# OR using Yarn
-yarn start
+* Add issue title
+* Select issue type (🚧 pothole, 🚦 traffic, 🚓 police, 🚑 accident, 🏗 construction)
+* Capture photo using camera
+* Get current location (GPS)
+* Save issue locally
+
+### 🗺 Map Integration
+
+* Interactive map using Leaflet (OpenStreetMap)
+* Displays all reported issues as markers
+* Click marker → view details + image
+* Auto-focus on latest issue
+
+### 🎯 Dashboard
+
+* View total issues
+* Category-wise count (traffic, pothole, etc.)
+* Clean UI with emoji indicators
+
+### 👤 Profile
+
+* View user info (email / guest)
+* Avatar (initial-based)
+* Logout option
+
+---
+
+## 🛠 Tech Stack
+
+* React Native (CLI)
+* JavaScript (ES6+)
+* AsyncStorage (local database)
+* React Navigation
+* React Native WebView
+* Leaflet + OpenStreetMap (free maps)
+* React Native Image Picker (camera)
+
+---
+
+## 📂 Project Structure
+
+```
+UrbanLens2/
+│
+├── src/
+│   ├── navigation/
+│   │   └── MainNavigator.js
+│   │
+│   ├── screens/
+│   │   ├── LoginScreen.js
+│   │   ├── SignupScreen.js
+│   │   ├── ForgotPasswordScreen.js
+│   │   ├── HomeScreen.js
+│   │   ├── MapScreen.js
+│   │   ├── ReportScreen.js
+│   │   └── ProfileScreen.js
+│   │
+│   ├── services/
+│   │   ├── authService.js
+│   │   ├── issueService.js
+│   │   └── locationService.js
+│
+├── android/
+├── ios/
+├── App.js
+└── package.json
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## ⚙️ Installation & Setup
 
-### Android
+### 1️⃣ Clone the repo
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```
+git clone https://github.com/your-username/urbanlens.git
+cd urbanlens
 ```
 
-### iOS
+### 2️⃣ Install dependencies
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```
+npm install
 ```
 
-Then, and every time you update your native dependencies, run:
+### 3️⃣ Start Metro
 
-```sh
-bundle exec pod install
+```
+npx react-native start
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### 4️⃣ Run app (Android)
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+```
+npx react-native run-android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 🔑 Permissions Required (Android)
 
-## Step 3: Modify your app
+Make sure these are added in `AndroidManifest.xml`:
 
-Now that you have successfully run the app, let's make changes!
+* INTERNET
+* CAMERA
+* ACCESS_FINE_LOCATION
+* ACCESS_COARSE_LOCATION
+* READ_MEDIA_IMAGES / READ_EXTERNAL_STORAGE
+* WRITE_EXTERNAL_STORAGE
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+---
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 📸 How It Works
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+1. User logs in / continues as guest
+2. Goes to **Report Screen**
+3. Adds title + captures photo + gets location
+4. Issue is saved locally
+5. Appears on **Map Screen** as marker
+6. Click marker → see details + image
 
-## Congratulations! :tada:
+---
 
-You've successfully run and modified your React Native App. :partying_face:
+## 🚀 Future Improvements
 
-### Now what?
+* 🔥 Firebase Authentication (real login)
+* 🌐 Cloud database (shared issues)
+* 📍 Live tracking
+* 🖼 Profile photo upload
+* 🔔 Notifications
+* 🌙 Dark mode
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## 👨‍💻 Author
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Pranav
 
-# Learn More
+---
 
-To learn more about React Native, take a look at the following resources:
+## ⭐ Support
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+If you like this project:
+
+* ⭐ Star the repo
+* 🍴 Fork it
+* 📢 Share it
+
+---
+
+## 📄 License
+
+This project is open-source and free to use.
