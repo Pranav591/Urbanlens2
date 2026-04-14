@@ -72,7 +72,7 @@ UrbanLens2/
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/urbanlens.git
+git clone https://github.com/Pranav591/Urbanlens2.git
 cd urbanlens
 
 # Install dependencies
