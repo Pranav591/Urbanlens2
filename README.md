@@ -121,4 +121,3 @@ Nishit Patel, Pragun Shrestha, Pranav Adhikari, Unique Shrestha, Sameera Simha J
 ## License
 
 MIT
-## Project Structure
