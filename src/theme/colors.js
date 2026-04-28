@@ -1,15 +1,15 @@
 export const colors = {
   primary: "#4F46E5",
-  primaryLight: "rgba(79, 70, 229, 0.1)",
+  primaryLight: "rgba(79, 70, 229, 0.15)",
   accent: "#F59E0B",
   danger: "#EF4444",
 
-  background: "#F1F5F9",
-  surface: "#FFFFFF",
+  background: "#0F172A",
+  surface: "#111827",
 
-  text: "#0F172A",
-  textSecondary: "#475569",
+  text: "#F9FAFB",
+  textSecondary: "#9CA3AF",
 
-  border: "#E2E8F0",
-  divider: "rgba(0,0,0,0.05)",
+  border: "rgba(255, 255, 255, 0.08)",
+  divider: "rgba(255, 255, 255, 0.04)",
 };

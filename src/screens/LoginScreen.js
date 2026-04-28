@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    TextInput,
-    TouchableOpacity,
     StyleSheet,
     Alert,
+    StatusBar,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
 } from 'react-native';
 
 import { saveUser } from '../services/authService';
+import { colors, spacing } from '../theme';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import Card from '../components/Card';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -30,116 +36,140 @@ export default function LoginScreen({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.container}
+        >
+            <StatusBar barStyle="light-content" />
+            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+                <View style={styles.header}>
+                    <Text style={styles.title}>UrbanLens</Text>
+                    <Text style={styles.subtitle}>Modern Civic Utility</Text>
+                </View>
 
-            {/* 🔥 TITLE */}
-            <Text style={styles.title}>UrbanLens</Text>
-            <Text style={styles.subtitle}>Login to continue</Text>
+                <Card style={styles.loginCard}>
+                    <Text style={styles.cardTitle}>Login</Text>
+                    <Input
+                        placeholder="Email Address"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
 
-            {/* 🔥 INPUTS */}
-            <TextInput
-                placeholder="Email"
-                placeholderTextColor="#888"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
+                    <Input
+                        placeholder="Password"
+                        secureTextEntry
+                        value={password}
+                        onChangeText={setPassword}
+                    />
 
-            <TextInput
-                placeholder="Password"
-                placeholderTextColor="#888"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-            />
+                    <Button
+                        title="Sign In"
+                        onPress={handleLogin}
+                        style={styles.loginBtn}
+                    />
 
-            {/* 🔥 LOGIN */}
-            <TouchableOpacity style={styles.btn} onPress={handleLogin}>
-                <Text style={styles.btnText}>Login</Text>
-            </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.forgotLink}
+                        onPress={() => navigation.navigate("Forgot")}
+                    >
+                        <Text style={styles.linkText}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                </Card>
 
-            {/* 🔥 GUEST */}
-            <TouchableOpacity style={styles.guestBtn} onPress={handleGuest}>
-                <Text style={styles.guestText}>Continue as Guest</Text>
-            </TouchableOpacity>
+                <View style={styles.footer}>
+                    <Button
+                        title="Continue as Guest"
+                        onPress={handleGuest}
+                        style={styles.guestBtn}
+                    />
 
-            {/* 🔗 LINKS */}
-            <TouchableOpacity onPress={() => navigation.navigate("Forgot")}>
-                <Text style={styles.link}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-                <Text style={styles.link}>Create Account</Text>
-            </TouchableOpacity>
-
-        </View>
+                    <View style={styles.signupContainer}>
+                        <Text style={styles.noAccountText}>Don't have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                            <Text style={styles.signupLink}>Sign Up</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
+
+// Custom TouchableOpacity for components that don't have it imported locally
+const TouchableOpacity = require('react-native').TouchableOpacity;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
+    },
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
-        padding: 20,
-        backgroundColor: '#f5f7fb',
+        padding: spacing.lg,
     },
-
+    header: {
+        alignItems: 'center',
+        marginBottom: spacing.xl,
+    },
     title: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        textAlign: 'center',
+        fontSize: 42,
+        fontWeight: '900',
+        color: colors.text,
+        letterSpacing: -1,
     },
-
     subtitle: {
-        textAlign: 'center',
-        marginBottom: 30,
-        color: '#666',
-    },
-
-    input: {
-        backgroundColor: '#fff',
-        padding: 14,
-        borderRadius: 12,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#ddd',   // 🔥 ADD BORDER
-        color: '#000',         // 🔥 ENSURE TEXT VISIBLE
-    },
-
-    btn: {
-        backgroundColor: '#007bff',
-        padding: 16,
-        borderRadius: 12,
-        marginTop: 10,
-    },
-
-    btnText: {
-        color: '#fff',
-        textAlign: 'center',
-        fontWeight: 'bold',
         fontSize: 16,
-    },
-
-    guestBtn: {
-        marginTop: 12,
-        padding: 14,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#007bff',
-    },
-
-    guestText: {
-        textAlign: 'center',
-        color: '#007bff',
+        color: colors.primary,
         fontWeight: '600',
+        letterSpacing: 2,
+        textTransform: 'uppercase',
+        marginTop: 4,
     },
-
-    link: {
-        textAlign: 'center',
-        marginTop: 12,
-        color: '#007bff',
+    loginCard: {
+        padding: spacing.lg,
+    },
+    cardTitle: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: spacing.lg,
+    },
+    loginBtn: {
+        marginTop: spacing.md,
+    },
+    forgotLink: {
+        alignItems: 'center',
+        marginTop: spacing.md,
+    },
+    linkText: {
+        color: colors.textSecondary,
+        fontSize: 14,
+    },
+    footer: {
+        marginTop: spacing.xl,
+    },
+    guestBtn: {
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderColor: colors.primary,
+        elevation: 0,
+        shadowOpacity: 0,
+    },
+    signupContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: spacing.xl,
+    },
+    noAccountText: {
+        color: colors.textSecondary,
+        fontSize: 15,
+    },
+    signupLink: {
+        color: colors.primary,
+        fontWeight: '700',
+        fontSize: 15,
     },
 });

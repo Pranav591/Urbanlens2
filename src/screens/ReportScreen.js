@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
@@ -34,6 +35,7 @@ export default function ReportScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -42,6 +44,7 @@ export default function ReportScreen() {
 
         {/* SECTION 1: Image Upload */}
         <Card style={styles.cardShadow}>
+          <Text style={styles.sectionTitle}>Evidence</Text>
           <TouchableOpacity
             style={styles.imageBox}
             onPress={handleImagePick}
@@ -52,10 +55,10 @@ export default function ReportScreen() {
             ) : (
               <View style={styles.uploadPlaceholder}>
                 <View style={styles.iconCircle}>
-                  <Icon name="camera-alt" size={32} color={colors.primary} />
+                  <Icon name="add-a-photo" size={32} color={colors.primary} />
                 </View>
-                <Text style={styles.uploadText}>Upload Photo</Text>
-                <Text style={styles.uploadSubtext}>JPEG or PNG (Max 5MB)</Text>
+                <Text style={styles.uploadText}>Capture or Upload</Text>
+                <Text style={styles.uploadSubtext}>Help us locate the issue faster</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -63,7 +66,7 @@ export default function ReportScreen() {
 
         {/* SECTION 2: Category Selection */}
         <Card style={styles.cardShadow}>
-          <Text style={styles.sectionTitle}>Select Category</Text>
+          <Text style={styles.sectionTitle}>Category</Text>
           <View style={styles.grid}>
             {categories.map((item) => {
               const isSelected = selectedCategory === item.id;
@@ -77,11 +80,13 @@ export default function ReportScreen() {
                     isSelected && styles.categoryItemSelected,
                   ]}
                 >
-                  <Icon
-                    name={item.icon}
-                    size={26}
-                    color={isSelected ? colors.primary : colors.textSecondary}
-                  />
+                  <View style={[styles.categoryIconCircle, isSelected && styles.categoryIconCircleSelected]}>
+                    <Icon
+                      name={item.icon}
+                      size={24}
+                      color={isSelected ? colors.text : colors.textSecondary}
+                    />
+                  </View>
                   <Text
                     style={[
                       styles.categoryLabel,
@@ -100,11 +105,12 @@ export default function ReportScreen() {
         <Card style={styles.cardShadow}>
           <Text style={styles.sectionTitle}>Description</Text>
           <Input
-            placeholder="What's happening? Be specific..."
+            placeholder="Describe the situation..."
             value={description}
             onChangeText={setDescription}
             multiline
             numberOfLines={4}
+            style={styles.textArea}
           />
         </Card>
       </ScrollView>
@@ -123,42 +129,35 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    padding: spacing.md,
+    padding: spacing.lg,
     paddingBottom: spacing.xl,
   },
   header: {
-    ...typography.title,
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
     color: colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   sectionTitle: {
-    ...typography.subtitle,
+    fontSize: 14,
     fontWeight: "700",
     marginBottom: spacing.md,
-    color: colors.text,
-    fontSize: 16,
-    letterSpacing: 0.2,
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   cardShadow: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.04)",
+    marginBottom: spacing.lg,
+    padding: spacing.lg,
   },
   imageBox: {
-    height: 180,
+    height: 200,
     width: "100%",
-    borderRadius: 14,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.02)",
+    backgroundColor: colors.background,
     borderWidth: 2,
     borderColor: colors.border,
     borderStyle: "dashed",
@@ -172,7 +171,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.primary + "15",
+    backgroundColor: colors.primaryLight,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: spacing.sm,
@@ -181,16 +180,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   uploadText: {
-    ...typography.body,
     color: colors.text,
     fontWeight: "700",
     fontSize: 16,
   },
   uploadSubtext: {
-    ...typography.caption,
     color: colors.textSecondary,
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
   },
   grid: {
     flexDirection: "row",
@@ -199,39 +196,48 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     width: "48%",
-    flexDirection: "column",
-    alignItems: "flex-start",
+    alignItems: "center",
     padding: spacing.md,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: colors.border,
     marginBottom: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
   },
   categoryItemSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.primary + "12",
-    borderWidth: 2,
+    backgroundColor: colors.primaryLight,
+  },
+  categoryIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  categoryIconCircleSelected: {
+    backgroundColor: colors.primary,
   },
   categoryLabel: {
-    ...typography.body,
-    marginTop: spacing.xs,
     color: colors.textSecondary,
     fontWeight: "600",
+    fontSize: 14,
   },
   categoryLabelSelected: {
-    color: colors.primary,
+    color: colors.text,
     fontWeight: "700",
+  },
+  textArea: {
+    height: 120,
+    textAlignVertical: 'top',
+    paddingTop: spacing.md,
   },
   footer: {
     padding: spacing.lg,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 10,
   },
 });

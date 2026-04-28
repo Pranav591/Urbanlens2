@@ -5,9 +5,13 @@ import {
     TouchableOpacity,
     StyleSheet,
     ScrollView,
+    StatusBar,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getIssues } from '../services/issueService';
+import { colors, spacing } from '../theme';
+import Card from '../components/Card';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function HomeScreen({ navigation }) {
     const [issues, setIssues] = useState([]);
@@ -23,152 +27,179 @@ export default function HomeScreen({ navigation }) {
         setIssues(data);
     };
 
-    // 🔥 Emoji Stats
     const stats = [
-        { emoji: "📊", value: issues.length },
-        { emoji: "🕳️", value: issues.filter(i => i.type === "pothole").length },
-        { emoji: "🗑️", value: issues.filter(i => i.type === "garbage").length },
-        { emoji: "🚗", value: issues.filter(i => i.type === "traffic").length },
-        { emoji: "🚓", value: issues.filter(i => i.type === "police").length },
-        { emoji: "🚧", value: issues.filter(i => i.type === "construction").length },
-        { emoji: "🚨", value: issues.filter(i => i.type === "accident").length },
+        { label: "Total", value: issues.length, icon: "analytics" },
+        { label: "Potholes", value: issues.filter(i => i.type === "pothole").length, icon: "report-problem" },
+        { label: "Garbage", value: issues.filter(i => i.type === "garbage").length, icon: "delete" },
+        { label: "Traffic", value: issues.filter(i => i.type === "traffic").length, icon: "traffic" },
     ];
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-            {/* 🔥 HEADER */}
+            {/* HEADER */}
             <View style={styles.header}>
-
-                <Text style={styles.title}>UrbanLens</Text>
-
-                <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-                    <Text style={styles.profileIcon}>👤</Text>
+                <View>
+                    <Text style={styles.welcomeText}>Welcome to</Text>
+                    <Text style={styles.title}>UrbanLens</Text>
+                </View>
+                <TouchableOpacity
+                    style={styles.profileButton}
+                    onPress={() => navigation.navigate("Profile")}
+                >
+                    <Icon name="person" size={24} color={colors.text} />
                 </TouchableOpacity>
-
             </View>
 
-            {/* 📊 STATS */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.statsContainer}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+                {/* STATS GRID */}
+                <Text style={styles.sectionTitle}>Overview</Text>
+                <View style={styles.statsGrid}>
                     {stats.map((item, index) => (
-                        <View key={index} style={styles.statBox}>
-                            <Text style={styles.statEmoji}>{item.emoji}</Text>
+                        <Card key={index} style={styles.statCard}>
+                            <Icon name={item.icon} size={24} color={colors.primary} />
                             <Text style={styles.statNumber}>{item.value}</Text>
-                        </View>
+                            <Text style={styles.statLabel}>{item.label}</Text>
+                        </Card>
                     ))}
                 </View>
-            </ScrollView>
 
-            {/* ⚡ QUICK ACTIONS */}
-            <View style={styles.actions}>
-
-                <TouchableOpacity
-                    onPress={() => navigation.navigate("Profile")}>
-                    <Text style={{ position: 'absolute', top: 20, right: 20 }}>👤</Text>
-                </TouchableOpacity>
+                {/* QUICK ACTIONS */}
+                <Text style={styles.sectionTitle}>Quick Actions</Text>
 
                 <TouchableOpacity
-                    style={styles.actionCard}
+                    activeOpacity={0.9}
                     onPress={() => navigation.navigate("Map")}
                 >
-                    <Text style={styles.icon}>🗺️</Text>
-                    <Text style={styles.actionTitle}>View Map</Text>
-                    <Text style={styles.actionDesc}>Explore nearby issues</Text>
+                    <Card style={styles.actionCard}>
+                        <View style={styles.actionIconContainer}>
+                            <Icon name="map" size={28} color={colors.primary} />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Explore Map</Text>
+                            <Text style={styles.actionDesc}>View reported issues in your area</Text>
+                        </View>
+                        <Icon name="chevron-right" size={24} color={colors.textSecondary} />
+                    </Card>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.actionCard}
+                    activeOpacity={0.9}
                     onPress={() => navigation.navigate("Report")}
                 >
-                    <Text style={styles.icon}>📸</Text>
-                    <Text style={styles.actionTitle}>Report Issue</Text>
-                    <Text style={styles.actionDesc}>Submit a new issue</Text>
+                    <Card style={styles.actionCard}>
+                        <View style={styles.actionIconContainer}>
+                            <Icon name="add-a-photo" size={28} color={colors.primary} />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Report Issue</Text>
+                            <Text style={styles.actionDesc}>Submit a new report with photos</Text>
+                        </View>
+                        <Icon name="chevron-right" size={24} color={colors.textSecondary} />
+                    </Card>
                 </TouchableOpacity>
 
-            </View>
-
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#adc5f7',
-        padding: 20,
+        backgroundColor: colors.background,
     },
-
-    title: {
-        fontSize: 26,
-        fontWeight: 'bold',
+    scrollContent: {
+        padding: spacing.lg,
     },
-
-    subtitle: {
-        color: '#a09e9e',
-        marginBottom: 20,
-    },
-
-    statsContainer: {
-        flexDirection: 'row',
-        gap: 10,
-    },
-
-    statBox: {
-        backgroundColor: '#8ed8fa',
-        padding: 15,
-        borderRadius: 12,
-        alignItems: 'center',
-        elevation: 4,
-        marginRight: 10,
-        minWidth: 70,
-    },
-
-    statEmoji: {
-        fontSize: 22,
-        marginBottom: 5,
-    },
-
-    statNumber: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-
-    actions: {
-        marginTop: 30,
-    },
-
-    actionCard: {
-        backgroundColor: '#8ed8fa',
-        padding: 20,
-        borderRadius: 15,
-        marginBottom: 15,
-        elevation: 4,
-    },
-
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.xl,
+        paddingBottom: spacing.md,
     },
-
-    profileIcon: {
-        fontSize: 26,
+    welcomeText: {
+        color: colors.textSecondary,
+        fontSize: 14,
+        fontWeight: '500',
     },
-
-    icon: {
+    title: {
+        color: colors.text,
         fontSize: 28,
+        fontWeight: '800',
+        letterSpacing: -0.5,
     },
-
+    profileButton: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: colors.surface,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    sectionTitle: {
+        color: colors.text,
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: spacing.md,
+        marginTop: spacing.md,
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    statCard: {
+        width: '48%',
+        alignItems: 'center',
+        paddingVertical: spacing.lg,
+        marginBottom: spacing.md,
+    },
+    statNumber: {
+        color: colors.text,
+        fontSize: 22,
+        fontWeight: '800',
+        marginTop: spacing.sm,
+    },
+    statLabel: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    actionCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: spacing.lg,
+        marginBottom: spacing.sm,
+    },
+    actionIconContainer: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        backgroundColor: colors.primaryLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionTextContainer: {
+        flex: 1,
+        marginLeft: spacing.md,
+    },
     actionTitle: {
+        color: colors.text,
         fontSize: 16,
-        fontWeight: 'bold',
-        marginTop: 5,
+        fontWeight: '700',
     },
-
     actionDesc: {
-        color: '#a09e9e',
-        marginTop: 3,
+        color: colors.textSecondary,
+        fontSize: 13,
+        marginTop: 2,
     },
 });

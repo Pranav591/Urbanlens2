@@ -2,9 +2,9 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { colors, spacing, typography } from "../theme";
 
-export default function Button({ title, onPress }) {
+export default function Button({ title, onPress, style }) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress} activeOpacity={0.8}>
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );
@@ -13,12 +13,19 @@ export default function Button({ title, onPress }) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: colors.primary,
-    padding: spacing.md,
-    borderRadius: 12,
-    alignItems: "center"
+    height: 56,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   text: {
-    color: "#fff",
-    ...typography.subtitle
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
   }
 });
