@@ -20,12 +20,11 @@ export default function SignupScreen({ navigation }) {
             return;
         }
 
-        // 🔥 Save user (simulate signup)
         await saveUser({ email, type: "user" });
 
         Alert.alert("Success", "Account created!");
 
-        navigation.replace("Home");
+        navigation.replace("App");
     };
 
     return (

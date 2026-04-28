@@ -21,12 +21,12 @@ export default function LoginScreen({ navigation }) {
         }
 
         await saveUser({ email, type: "user" });
-        navigation.replace("Home");
+        navigation.replace("App");
     };
 
     const handleGuest = async () => {
         await saveUser({ type: "guest" });
-        navigation.replace("Home");
+        navigation.replace("App");
     };
 
     return (
