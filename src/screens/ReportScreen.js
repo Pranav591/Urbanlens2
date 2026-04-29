@@ -11,15 +11,17 @@ import {
   PermissionsAndroid,
   Platform,
 } from "react-native";
+
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import Geolocation from 'react-native-geolocation-service';
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import Geolocation from "react-native-geolocation-service";
 
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Card from "../components/Card";
 import { colors, spacing } from "../theme";
-import { addIssue } from "../services/issueService";
+
+import { addIssue } from "../services/firestoreService";
 
 const categories = [
   { id: "pothole", label: "Pothole", icon: "report-problem" },
@@ -36,87 +38,17 @@ export default function ReportScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'Camera Permission',
-            message: 'UrbanLens needs access to your camera to take photos of issues.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        return false;
-      }
+    if (Platform.OS === "android") {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
     return true;
   };
 
-  const handleImagePick = () => {
-    Alert.alert(
-      "Select Image",
-      "Choose a photo from gallery or take a new one",
-      [
-        {
-          text: "Camera",
-          onPress: async () => {
-            const hasPermission = await requestCameraPermission();
-            if (hasPermission) {
-              launchCamera({ mediaType: 'photo', quality: 0.8 }, (response) => {
-                if (response.assets && response.assets.length > 0) {
-                  setImage(response.assets[0].uri);
-                }
-              });
-            }
-          }
-        },
-        {
-          text: "Gallery",
-          onPress: () => {
-            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, (response) => {
-              if (response.assets && response.assets.length > 0) {
-                setImage(response.assets[0].uri);
-              }
-            });
-          }
-        },
-        { text: "Cancel", style: "cancel" }
-      ]
-    );
-  };
-
-  const handleSubmit = async () => {
-    if (!description || !selectedCategory) {
-      Alert.alert("Missing Information", "Please select a category and provide a description.");
-      return;
-    }
-
-    setLoading(true);
-
-    const hasLocationPermission = await requestLocationPermission();
-
-    if (hasLocationPermission) {
-      Geolocation.getCurrentPosition(
-        async (position) => {
-          await saveReport(position.coords.latitude, position.coords.longitude);
-        },
-        async (error) => {
-          // Fallback to Bangalore
-          await saveReport(12.9716, 77.5946);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-      );
-    } else {
-      await saveReport(12.9716, 77.5946);
-    }
-  };
-
   const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
@@ -125,100 +57,139 @@ export default function ReportScreen({ navigation }) {
     return true;
   };
 
-  const saveReport = async (lat, lng) => {
-    const issue = {
-      title: categories.find(c => c.id === selectedCategory)?.label || "Issue",
-      description,
-      type: selectedCategory,
-      photo: image,
-      lat,
-      lng,
-      status: "Reported",
-      timestamp: new Date().toISOString()
-    };
-
-    await addIssue(issue);
-    setLoading(false);
-    Alert.alert("Success", "Your report has been submitted.", [
-      { text: "OK", onPress: () => navigation.navigate("Home") }
+  const handleImagePick = () => {
+    Alert.alert("Select Image", "Choose source", [
+      {
+        text: "Camera",
+        onPress: async () => {
+          const ok = await requestCameraPermission();
+          if (ok) {
+            launchCamera({ mediaType: "photo", quality: 0.8 }, (res) => {
+              if (res.assets && res.assets.length > 0) {
+                setImage(res.assets[0].uri);
+              }
+            });
+          }
+        },
+      },
+      {
+        text: "Gallery",
+        onPress: () => {
+          launchImageLibrary({ mediaType: "photo", quality: 0.8 }, (res) => {
+            if (res.assets && res.assets.length > 0) {
+              setImage(res.assets[0].uri);
+            }
+          });
+        },
+      },
+      { text: "Cancel", style: "cancel" },
     ]);
+  };
+
+  const saveReport = async (lat, lng) => {
+    try {
+      const issue = {
+        category: selectedCategory,
+        description,
+        image: image || null,
+        location: {
+          lat,
+          lng,
+        },
+      };
+
+      await addIssue(issue);
+
+      setLoading(false);
+
+      Alert.alert("Success", "Report submitted");
+
+      setDescription("");
+      setSelectedCategory(null);
+      setImage(null);
+
+      navigation.navigate("Home");
+    } catch (err) {
+      console.log("Firestore Error:", err);
+      setLoading(false);
+      Alert.alert("Error submitting report");
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!description || !selectedCategory) {
+      Alert.alert("Error", "Fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    const hasLocation = await requestLocationPermission();
+
+    if (hasLocation) {
+      Geolocation.getCurrentPosition(
+        (pos) => {
+          saveReport(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => {
+          // fallback Bangalore
+          saveReport(12.9716, 77.5946);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      saveReport(12.9716, 77.5946);
+    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+
+      <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.header}>Report Issue</Text>
 
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Evidence</Text>
-          <TouchableOpacity
-            style={styles.imageBox}
-            onPress={handleImagePick}
-            activeOpacity={0.8}
-          >
+        {/* IMAGE */}
+        <Card>
+          <TouchableOpacity style={styles.imageBox} onPress={handleImagePick}>
             {image ? (
               <Image source={{ uri: image }} style={styles.image} />
             ) : (
-              <View style={styles.uploadPlaceholder}>
-                <View style={styles.iconCircle}>
-                  <Icon name="add-a-photo" size={32} color={colors.primary} />
-                </View>
-                <Text style={styles.uploadText}>Capture or Upload</Text>
-                <Text style={styles.uploadSubtext}>Help us locate the issue faster</Text>
+              <View style={styles.placeholder}>
+                <Icon name="camera-alt" size={30} color={colors.primary} />
+                <Text>Upload Photo</Text>
               </View>
             )}
           </TouchableOpacity>
         </Card>
 
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Category</Text>
+        {/* CATEGORY */}
+        <Card>
+          <Text style={styles.section}>Category</Text>
           <View style={styles.grid}>
-            {categories.map((item) => {
-              const isSelected = selectedCategory === item.id;
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => setSelectedCategory(item.id)}
-                  activeOpacity={0.7}
-                  style={[
-                    styles.categoryItem,
-                    isSelected && styles.categoryItemSelected,
-                  ]}
-                >
-                  <View style={[styles.categoryIconCircle, isSelected && styles.categoryIconCircleSelected]}>
-                    <Icon
-                      name={item.icon}
-                      size={24}
-                      color={isSelected ? "#FFFFFF" : colors.textSecondary}
-                    />
-                  </View>
-                  <Text
-                    style={[
-                      styles.categoryLabel,
-                      isSelected && styles.categoryLabelSelected,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            {categories.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.cat,
+                  selectedCategory === item.id && styles.catSelected,
+                ]}
+                onPress={() => setSelectedCategory(item.id)}
+              >
+                <Icon name={item.icon} size={20} />
+                <Text>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </Card>
 
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Description</Text>
+        {/* DESCRIPTION */}
+        <Card>
+          <Text style={styles.section}>Description</Text>
           <Input
-            placeholder="Describe the situation..."
+            placeholder="Describe issue"
             value={description}
             onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            style={styles.textArea}
           />
         </Card>
       </ScrollView>
@@ -227,7 +198,6 @@ export default function ReportScreen({ navigation }) {
         <Button
           title={loading ? "Submitting..." : "Submit Report"}
           onPress={handleSubmit}
-          disabled={loading}
         />
       </View>
     </View>
@@ -235,121 +205,33 @@ export default function ReportScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    fontSize: 32,
-    fontWeight: "800",
-    marginBottom: spacing.lg,
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  sectionCard: {
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: spacing.md,
-    color: colors.text,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  scroll: { padding: spacing.md },
+  header: { fontSize: 26, fontWeight: "bold", marginBottom: 10 },
+  section: { fontWeight: "bold", marginBottom: 10 },
+
   imageBox: {
-    height: 180,
-    width: "100%",
-    borderRadius: 16,
+    height: 150,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: 1,
     borderStyle: "dashed",
-    overflow: "hidden",
   },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryLight,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing.sm,
-  },
-  uploadPlaceholder: {
-    alignItems: "center",
-  },
-  uploadText: {
-    color: colors.text,
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  uploadSubtext: {
-    color: colors.textSecondary,
-    marginTop: 2,
-    fontSize: 13,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  categoryItem: {
+  placeholder: { alignItems: "center" },
+  image: { width: "100%", height: "100%" },
+
+  grid: { flexDirection: "row", flexWrap: "wrap" },
+  cat: {
     width: "48%",
+    padding: 10,
+    margin: "1%",
+    borderWidth: 1,
     alignItems: "center",
-    paddingVertical: spacing.lg,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    marginBottom: spacing.md,
-    backgroundColor: colors.surface,
   },
-  categoryItemSelected: {
+  catSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: "#eee",
   },
-  categoryIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  categoryIconCircleSelected: {
-    backgroundColor: colors.primary,
-  },
-  categoryLabel: {
-    color: colors.textSecondary,
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  categoryLabelSelected: {
-    color: colors.primary,
-    fontWeight: "700",
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: 'top',
-    paddingTop: spacing.md,
-    backgroundColor: colors.background,
-    borderColor: 'transparent',
-  },
-  footer: {
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    elevation: 10,
-  },
+
+  footer: { padding: 10 },
 });
