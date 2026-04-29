@@ -36,9 +36,8 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.background} />
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
-            {/* HEADER */}
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcomeText}>Welcome to</Text>
@@ -48,29 +47,28 @@ export default function HomeScreen({ navigation }) {
                     style={styles.profileButton}
                     onPress={() => navigation.navigate("Profile")}
                 >
-                    <Icon name="person" size={24} color={colors.text} />
+                    <Icon name="person" size={26} color={colors.primary} />
                 </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-
-                {/* STATS GRID */}
                 <Text style={styles.sectionTitle}>Overview</Text>
                 <View style={styles.statsGrid}>
                     {stats.map((item, index) => (
                         <Card key={index} style={styles.statCard}>
-                            <Icon name={item.icon} size={24} color={colors.primary} />
+                            <View style={styles.statIconContainer}>
+                                <Icon name={item.icon} size={22} color={colors.primary} />
+                            </View>
                             <Text style={styles.statNumber}>{item.value}</Text>
                             <Text style={styles.statLabel}>{item.label}</Text>
                         </Card>
                     ))}
                 </View>
 
-                {/* QUICK ACTIONS */}
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
 
                 <TouchableOpacity
-                    activeOpacity={0.9}
+                    activeOpacity={0.8}
                     onPress={() => navigation.navigate("Map")}
                 >
                     <Card style={styles.actionCard}>
@@ -86,7 +84,7 @@ export default function HomeScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    activeOpacity={0.9}
+                    activeOpacity={0.8}
                     onPress={() => navigation.navigate("Report")}
                 >
                     <Card style={styles.actionCard}>
@@ -100,7 +98,6 @@ export default function HomeScreen({ navigation }) {
                         <Icon name="chevron-right" size={24} color={colors.textSecondary} />
                     </Card>
                 </TouchableOpacity>
-
             </ScrollView>
         </View>
     );
@@ -129,26 +126,27 @@ const styles = StyleSheet.create({
     },
     title: {
         color: colors.text,
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: '800',
         letterSpacing: -0.5,
     },
     profileButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 52,
+        height: 52,
+        borderRadius: 26,
         backgroundColor: colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
+        elevation: 2,
     },
     sectionTitle: {
         color: colors.text,
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
         marginBottom: spacing.md,
-        marginTop: spacing.md,
+        marginTop: spacing.lg,
     },
     statsGrid: {
         flexDirection: 'row',
@@ -161,18 +159,26 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.lg,
         marginBottom: spacing.md,
     },
+    statIconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: colors.primaryLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
     statNumber: {
         color: colors.text,
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: '800',
-        marginTop: spacing.sm,
     },
     statLabel: {
         color: colors.textSecondary,
         fontSize: 12,
         fontWeight: '600',
         textTransform: 'uppercase',
-        letterSpacing: 1,
+        letterSpacing: 0.5,
     },
     actionCard: {
         flexDirection: 'row',
@@ -194,12 +200,12 @@ const styles = StyleSheet.create({
     },
     actionTitle: {
         color: colors.text,
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '700',
     },
     actionDesc: {
         color: colors.textSecondary,
-        fontSize: 13,
+        fontSize: 14,
         marginTop: 2,
     },
 });

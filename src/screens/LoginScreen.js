@@ -8,6 +8,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    TouchableOpacity,
 } from 'react-native';
 
 import { saveUser } from '../services/authService';
@@ -40,7 +41,7 @@ export default function LoginScreen({ navigation }) {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.container}
         >
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
                 <View style={styles.header}>
                     <Text style={styles.title}>UrbanLens</Text>
@@ -48,7 +49,9 @@ export default function LoginScreen({ navigation }) {
                 </View>
 
                 <Card style={styles.loginCard}>
-                    <Text style={styles.cardTitle}>Login</Text>
+                    <Text style={styles.cardTitle}>Sign In</Text>
+                    <Text style={styles.cardSubtitle}>Enter your details to continue</Text>
+
                     <Input
                         placeholder="Email Address"
                         value={email}
@@ -83,6 +86,7 @@ export default function LoginScreen({ navigation }) {
                         title="Continue as Guest"
                         onPress={handleGuest}
                         style={styles.guestBtn}
+                        textStyle={styles.guestBtnText}
                     />
 
                     <View style={styles.signupContainer}>
@@ -97,9 +101,6 @@ export default function LoginScreen({ navigation }) {
     );
 }
 
-// Custom TouchableOpacity for components that don't have it imported locally
-const TouchableOpacity = require('react-native').TouchableOpacity;
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -112,29 +113,35 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: spacing.xl * 1.5,
     },
     title: {
-        fontSize: 42,
+        fontSize: 48,
         fontWeight: '900',
         color: colors.text,
-        letterSpacing: -1,
+        letterSpacing: -1.5,
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: colors.primary,
-        fontWeight: '600',
-        letterSpacing: 2,
+        fontWeight: '700',
+        letterSpacing: 3,
         textTransform: 'uppercase',
         marginTop: 4,
     },
     loginCard: {
-        padding: spacing.lg,
+        padding: spacing.xl,
+        borderRadius: 24,
     },
     cardTitle: {
         fontSize: 24,
-        fontWeight: '700',
+        fontWeight: '800',
         color: colors.text,
+        marginBottom: 4,
+    },
+    cardSubtitle: {
+        fontSize: 15,
+        color: colors.textSecondary,
         marginBottom: spacing.lg,
     },
     loginBtn: {
@@ -142,21 +149,27 @@ const styles = StyleSheet.create({
     },
     forgotLink: {
         alignItems: 'center',
-        marginTop: spacing.md,
+        marginTop: spacing.lg,
     },
     linkText: {
         color: colors.textSecondary,
+        fontWeight: '600',
         fontSize: 14,
     },
     footer: {
         marginTop: spacing.xl,
+        paddingHorizontal: spacing.md,
     },
     guestBtn: {
         backgroundColor: 'transparent',
-        borderWidth: 1.5,
+        borderWidth: 2,
         borderColor: colors.primary,
         elevation: 0,
         shadowOpacity: 0,
+    },
+    guestBtnText: {
+        color: colors.primary,
+        fontWeight: '700',
     },
     signupContainer: {
         flexDirection: 'row',
@@ -166,6 +179,7 @@ const styles = StyleSheet.create({
     noAccountText: {
         color: colors.textSecondary,
         fontSize: 15,
+        fontWeight: '500',
     },
     signupLink: {
         color: colors.primary,
