@@ -16,11 +16,10 @@ export default function App() {
       const user = await getUser();
       setInitialRoute(user ? "Home" : "Login");
     } catch (e) {
-      setInitialRoute("Login"); // fallback
+      setInitialRoute("Login");
     }
   };
 
-  // ✅ IMPORTANT FIX
   if (initialRoute === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
