@@ -14,6 +14,8 @@ import Geolocation from '@react-native-community/geolocation';
 import { getIssues } from '../services/issueService';
 import { useFocusEffect } from '@react-navigation/native';
 
+const BANGALORE = { lat: 12.9716, lng: 77.5946 };
+
 export default function MapScreen() {
     const webviewRef = useRef(null);
 
@@ -21,6 +23,7 @@ export default function MapScreen() {
     const [selectedIssue, setSelectedIssue] = useState(null);
     const [filter, setFilter] = useState("all");
     const [location, setLocation] = useState(null);
+    const [locationReady, setLocationReady] = useState(false);
 
     useEffect(() => {
         requestLocation();
@@ -40,7 +43,9 @@ export default function MapScreen() {
                 );
 
                 if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log("Location permission denied");
+                    console.log("Location permission denied, using Bangalore default");
+                    setLocation(BANGALORE);
+                    setLocationReady(true);
                     return;
                 }
             }
@@ -49,14 +54,19 @@ export default function MapScreen() {
                 (pos) => {
                     const { latitude, longitude } = pos.coords;
                     setLocation({ lat: latitude, lng: longitude });
+                    setLocationReady(true);
                 },
                 (err) => {
-                    console.log("Location error:", err);
+                    console.log("Location error, using Bangalore default:", err);
+                    setLocation(BANGALORE);
+                    setLocationReady(true);
                 },
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
             );
         } catch (err) {
-            console.log(err);
+            console.log("Location exception, using Bangalore default:", err);
+            setLocation(BANGALORE);
+            setLocationReady(true);
         }
     };
 
@@ -75,40 +85,36 @@ export default function MapScreen() {
             ? issues
             : issues.filter(i => i.type === filter);
 
-    const html = `
+    const buildHtml = (loc, issueList) => `
     <!DOCTYPE html>
     <html>
     <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        html, body, #map { height: 100%; margin: 0; }
+        html, body, #map { height: 100%; margin: 0; padding: 0; }
     </style>
     </head>
     <body>
     <div id="map"></div>
-
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-
-        var userLocation = ${location ? `[${location.lat}, ${location.lng}]` : `[12.9716, 77.5946]`};
-
+        var userLocation = [${loc.lat}, ${loc.lng}];
         var map = L.map('map').setView(userLocation, 14);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-        // 🔵 USER MARKER
         L.marker(userLocation).addTo(map)
             .bindPopup("You are here")
             .openPopup();
 
-        var issues = ${JSON.stringify(filteredIssues)};
+        var issues = ${JSON.stringify(issueList)};
 
-        issues.forEach(issue => {
+        issues.forEach(function(issue) {
             if (issue.lat && issue.lng) {
-
                 var color = "blue";
-
                 if (issue.type === "pothole") color = "red";
                 if (issue.type === "garbage") color = "green";
                 if (issue.type === "traffic") color = "orange";
@@ -122,19 +128,16 @@ export default function MapScreen() {
                 }).addTo(map);
 
                 marker.on('click', function() {
-                    window.ReactNativeWebView.postMessage(
-                        JSON.stringify(issue)
-                    );
+                    window.ReactNativeWebView.postMessage(JSON.stringify(issue));
                 });
             }
         });
-
     </script>
     </body>
     </html>
     `;
 
-    if (!location) {
+    if (!locationReady) {
         return (
             <View style={styles.loader}>
                 <Text>Fetching location...</Text>
@@ -169,11 +172,13 @@ export default function MapScreen() {
             </ScrollView>
 
             <WebView
-                key={JSON.stringify(filteredIssues) + JSON.stringify(location)}
+                key={filter}
                 ref={webviewRef}
-                source={{ html }}
+                source={{ html: buildHtml(location, filteredIssues) }}
                 style={styles.map}
                 onMessage={handleMessage}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
             />
 
             <View style={styles.legend}>
