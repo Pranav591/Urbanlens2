@@ -12,13 +12,12 @@ import {
 
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import firestore from "@react-native-firebase/firestore";
 
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Card from "../components/Card";
 import { colors, spacing } from "../theme";
-
-import { addIssue } from "../services/firestoreService";
 
 const categories = [
   { id: "pothole", label: "Pothole", icon: "report-problem" },
@@ -34,14 +33,13 @@ export default function ReportScreen({ navigation }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // IMAGE PICKER
   const handleImagePick = () => {
     Alert.alert("Select Image", "Choose source", [
       {
         text: "Camera",
         onPress: () => {
           launchCamera({ mediaType: "photo", quality: 0.8 }, (res) => {
-            if (res.assets && res.assets.length > 0) {
+            if (res.assets?.length) {
               setImage(res.assets[0].uri);
             }
           });
@@ -51,7 +49,7 @@ export default function ReportScreen({ navigation }) {
         text: "Gallery",
         onPress: () => {
           launchImageLibrary({ mediaType: "photo", quality: 0.8 }, (res) => {
-            if (res.assets && res.assets.length > 0) {
+            if (res.assets?.length) {
               setImage(res.assets[0].uri);
             }
           });
@@ -61,23 +59,41 @@ export default function ReportScreen({ navigation }) {
     ]);
   };
 
-  const saveReport = async () => {
+  const handleSubmit = async () => {
+    if (!description || !selectedCategory) {
+      Alert.alert("Error", "Fill all fields");
+      return;
+    }
+
+    if (loading) return;
+
     try {
+      setLoading(true);
+
       const issue = {
         category: selectedCategory,
         description,
         image: image || null,
+
         location: {
           lat: 12.9716,
           lng: 77.5946,
         },
+
+        status: "open",
+        severity: "medium",
+        reportCount: 1,
+        userId: "temp_user",
       };
 
-      console.log("Saving issue:", issue);
+      console.log("SUBMITTING:", issue);
 
-      await addIssue(issue);
-
-      Alert.alert("Success", "Report submitted");
+      await firestore()
+        .collection("issues")
+        .add({
+          ...issue,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        });
 
       setDescription("");
       setSelectedCategory(null);
@@ -86,22 +102,11 @@ export default function ReportScreen({ navigation }) {
       navigation.navigate("Home");
 
     } catch (err) {
-      console.log("SAVE ERROR:", err);
+      console.error("SUBMIT ERROR:", err);
       Alert.alert("Error", "Failed to submit report");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSubmit = async () => {
-    if (!description || !selectedCategory) {
-      Alert.alert("Error", "Fill all fields");
-      return;
-    }
-
-    setLoading(true);
-
-    await saveReport();
   };
 
   return (
@@ -156,6 +161,7 @@ export default function ReportScreen({ navigation }) {
         </Card>
       </ScrollView>
 
+      {/* SUBMIT */}
       <View style={styles.footer}>
         <Button
           title={loading ? "Submitting..." : "Submit Report"}
@@ -179,21 +185,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: "dashed",
   },
-  placeholder: { alignItems: "center" },
-  image: { width: "100%", height: "100%" },
 
-  grid: { flexDirection: "row", flexWrap: "wrap" },
+  placeholder: { alignItems: "center" },
+
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+  },
+
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+
   cat: {
     width: "48%",
     padding: 10,
     margin: "1%",
     borderWidth: 1,
+    borderRadius: 8,
     alignItems: "center",
   },
+
   catSelected: {
     borderColor: colors.primary,
     backgroundColor: "#eee",
   },
 
-  footer: { padding: 10 },
+  footer: {
+    padding: 10,
+  },
 });

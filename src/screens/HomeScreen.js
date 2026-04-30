@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,31 +6,46 @@ import {
     StyleSheet,
     ScrollView,
     StatusBar,
-    Dimensions,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { getIssues } from '../services/issueService';
+import firestore from '@react-native-firebase/firestore';
 import { colors, spacing } from '../theme';
 import Card from '../components/Card';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-
 export default function HomeScreen({ navigation }) {
     const [issues, setIssues] = useState([]);
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchIssues();
-        }, [])
-    );
+    useEffect(() => {
+        const unsubscribe = firestore()
+            .collection('issues')
+            .orderBy('createdAt', 'desc')
+            .onSnapshot(snapshot => {
+                const data = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setIssues(data);
+            });
 
-    const fetchIssues = async () => {
+        return () => unsubscribe();
+    }, []);
+
+    const formatTime = (timestamp) => {
         try {
-            const data = await getIssues();
-            setIssues(data);
-        } catch (err) {
-            console.error("HOME FETCH ERROR:", err);
+            if (!timestamp || !timestamp.toDate) return "just now";
+
+            const date = timestamp.toDate();
+            const now = new Date();
+
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return "just now";
+            if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+
+            return `${Math.floor(diff / 86400)} day ago`;
+        } catch {
+            return "just now";
         }
     };
 
@@ -56,10 +71,7 @@ export default function HomeScreen({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
                 {/* OVERVIEW */}
                 <Text style={styles.sectionTitle}>Overview</Text>
@@ -76,42 +88,63 @@ export default function HomeScreen({ navigation }) {
                     ))}
                 </View>
 
+                {/* RECENT REPORTS */}
+                <Text style={styles.sectionTitle}>Recent Reports</Text>
+
+                {issues.length === 0 ? (
+                    <Text style={styles.emptyText}>No reports yet</Text>
+                ) : (
+                    issues.slice(0, 3).map((item) => (
+                        <View key={item.id} style={styles.issueItem}>
+                            <Text style={styles.issueTitle}>
+                                {item.category?.toUpperCase() || "ISSUE"}
+                            </Text>
+
+                            <Text style={styles.issueDesc}>
+                                {item.description || "No description"}
+                            </Text>
+
+                            <Text style={styles.issueTime}>
+                                {formatTime(item.createdAt)}
+                            </Text>
+                        </View>
+                    ))
+                )}
+
                 {/* QUICK ACTIONS */}
-                <View style={styles.actionsWrapper}>
-                    <Text style={styles.sectionTitle}>Quick Actions</Text>
+                <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-                    <TouchableOpacity
-                        activeOpacity={0.85}
-                        onPress={() => navigation.navigate("Map")}
-                    >
-                        <Card style={styles.actionCard}>
-                            <View style={styles.actionIconContainer}>
-                                <Icon name="map" size={26} color={colors.primary} />
-                            </View>
-                            <View style={styles.actionTextContainer}>
-                                <Text style={styles.actionTitle}>Explore Map</Text>
-                                <Text style={styles.actionDesc}>View reported issues in your area</Text>
-                            </View>
-                            <Icon name="chevron-right" size={22} color={colors.textSecondary} />
-                        </Card>
-                    </TouchableOpacity>
+                <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => navigation.navigate("Map")}
+                >
+                    <Card style={styles.actionCard}>
+                        <View style={styles.actionIconContainer}>
+                            <Icon name="map" size={26} color={colors.primary} />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Explore Map</Text>
+                            <Text style={styles.actionDesc}>View reported issues in your area</Text>
+                        </View>
+                        <Icon name="chevron-right" size={22} color={colors.textSecondary} />
+                    </Card>
+                </TouchableOpacity>
 
-                    <TouchableOpacity
-                        activeOpacity={0.85}
-                        onPress={() => navigation.navigate("Report")}
-                    >
-                        <Card style={styles.actionCard}>
-                            <View style={styles.actionIconContainer}>
-                                <Icon name="add-a-photo" size={26} color={colors.primary} />
-                            </View>
-                            <View style={styles.actionTextContainer}>
-                                <Text style={styles.actionTitle}>Report Issue</Text>
-                                <Text style={styles.actionDesc}>Submit a new report with photos</Text>
-                            </View>
-                            <Icon name="chevron-right" size={22} color={colors.textSecondary} />
-                        </Card>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => navigation.navigate("Report")}
+                >
+                    <Card style={styles.actionCard}>
+                        <View style={styles.actionIconContainer}>
+                            <Icon name="add-a-photo" size={26} color={colors.primary} />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Report Issue</Text>
+                            <Text style={styles.actionDesc}>Submit a new report with photos</Text>
+                        </View>
+                        <Icon name="chevron-right" size={22} color={colors.textSecondary} />
+                    </Card>
+                </TouchableOpacity>
 
             </ScrollView>
         </View>
@@ -153,13 +186,12 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: spacing.lg,
         paddingBottom: spacing.lg,
-        minHeight: SCREEN_HEIGHT,
     },
 
     sectionTitle: {
-        color: colors.text,
         fontSize: 18,
         fontWeight: '700',
+        color: colors.text,
         marginBottom: spacing.sm,
         marginTop: spacing.sm,
     },
@@ -201,9 +233,36 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
     },
 
-    actionsWrapper: {
-        flex: 1,
-        justifyContent: 'flex-start',
+    issueItem: {
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 8,
+        elevation: 2,
+    },
+
+    issueTitle: {
+        fontWeight: '700',
+        fontSize: 14,
+        color: colors.text,
+    },
+
+    issueDesc: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 2,
+    },
+
+    issueTime: {
+        fontSize: 11,
+        color: '#888',
+        marginTop: 4,
+    },
+
+    emptyText: {
+        color: colors.textSecondary,
+        fontSize: 13,
+        marginBottom: spacing.md,
     },
 
     actionCard: {

@@ -19,7 +19,6 @@ export default function MapScreen() {
     const webviewRef = useRef(null);
 
     const [issues, setIssues] = useState([]);
-    const [selectedIssue, setSelectedIssue] = useState(null);
     const [filter, setFilter] = useState("all");
     const [location, setLocation] = useState(DEFAULT_LOCATION);
 
@@ -39,46 +38,28 @@ export default function MapScreen() {
                 const granted = await PermissionsAndroid.request(
                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
                 );
-
-                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log("Permission denied → using default");
-                    return;
-                }
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) return;
             }
 
             Geolocation.getCurrentPosition(
                 (pos) => {
                     const { latitude, longitude } = pos.coords;
-                    console.log("GPS:", latitude, longitude);
                     setLocation({ lat: latitude, lng: longitude });
                 },
-                (err) => {
-                    console.log("GPS failed:", err);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 5000,
-                }
+                () => {},
+                { enableHighAccuracy: true, timeout: 10000 }
             );
-        } catch (err) {
-            console.log("Location error:", err);
-        }
+        } catch {}
     };
 
     const loadIssues = async () => {
         try {
             const data = await getIssues();
-            console.log("FIRESTORE DATA:", data);
+            console.log("FINAL MAP DATA:", data);
             setIssues(data);
         } catch (err) {
-            console.error("FETCH ERROR:", err);
+            console.error(err);
         }
-    };
-
-    const handleMessage = (event) => {
-        const data = JSON.parse(event.nativeEvent.data);
-        setSelectedIssue(data);
     };
 
     const filteredIssues =
@@ -86,7 +67,17 @@ export default function MapScreen() {
             ? issues
             : issues.filter(i => i.category === filter);
 
-    const buildHtml = (loc) => `
+    const normalizedIssues = filteredIssues.map(i => {
+        if (!i.location) return null;
+
+        return {
+            ...i,
+            lat: i.location.lat || i.location.latitude,
+            lng: i.location.lng || i.location.longitude,
+        };
+    }).filter(Boolean);
+
+    const buildHtml = (loc, issueList) => `
     <!DOCTYPE html>
     <html>
     <head>
@@ -106,9 +97,31 @@ export default function MapScreen() {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        // user marker
         L.marker([${loc.lat}, ${loc.lng}]).addTo(map)
-            .bindPopup("You are here")
-            .openPopup();
+            .bindPopup("You are here");
+
+        var issues = ${JSON.stringify(issueList)};
+
+        issues.forEach(function(issue) {
+            if (!issue.lat || !issue.lng) return;
+
+            var color = "blue";
+
+            if (issue.category === "pothole") color = "red";
+            else if (issue.category === "garbage") color = "green";
+            else if (issue.category === "traffic") color = "orange";
+            else if (issue.category === "construction") color = "brown";
+
+            L.circleMarker([issue.lat, issue.lng], {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.9,
+                radius: 9
+            })
+            .addTo(map)
+            .bindPopup(issue.category);
+        });
     </script>
     </body>
     </html>
@@ -139,24 +152,10 @@ export default function MapScreen() {
             </ScrollView>
 
             <WebView
-                key={JSON.stringify(location)}
-                source={{ html: buildHtml(location) }}
+                key={JSON.stringify(normalizedIssues) + JSON.stringify(location)}
+                source={{ html: buildHtml(location, normalizedIssues) }}
                 style={styles.map}
-                onMessage={handleMessage}
             />
-
-            {selectedIssue && (
-                <View style={styles.card}>
-                    <Text>{selectedIssue.category}</Text>
-
-                    <TouchableOpacity
-                        style={styles.closeBtn}
-                        onPress={() => setSelectedIssue(null)}
-                    >
-                        <Text style={{ color: '#fff' }}>Close</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
         </View>
     );
 }
@@ -181,21 +180,5 @@ const styles = StyleSheet.create({
 
     activeChip: {
         backgroundColor: '#007bff',
-    },
-
-    card: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#fff',
-        padding: 20,
-    },
-
-    closeBtn: {
-        marginTop: 10,
-        backgroundColor: '#007bff',
-        padding: 10,
-        alignItems: 'center',
     },
 });
