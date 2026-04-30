@@ -8,13 +8,10 @@ import {
   ScrollView,
   StatusBar,
   Alert,
-  PermissionsAndroid,
-  Platform,
 } from "react-native";
 
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import Geolocation from "react-native-geolocation-service";
 
 import Button from "../components/Button";
 import Input from "../components/Input";
@@ -37,39 +34,17 @@ export default function ReportScreen({ navigation }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const requestCameraPermission = async () => {
-    if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-    return true;
-  };
-
-  const requestLocationPermission = async () => {
-    if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-    return true;
-  };
-
+  // IMAGE PICKER
   const handleImagePick = () => {
     Alert.alert("Select Image", "Choose source", [
       {
         text: "Camera",
-        onPress: async () => {
-          const ok = await requestCameraPermission();
-          if (ok) {
-            launchCamera({ mediaType: "photo", quality: 0.8 }, (res) => {
-              if (res.assets && res.assets.length > 0) {
-                setImage(res.assets[0].uri);
-              }
-            });
-          }
+        onPress: () => {
+          launchCamera({ mediaType: "photo", quality: 0.8 }, (res) => {
+            if (res.assets && res.assets.length > 0) {
+              setImage(res.assets[0].uri);
+            }
+          });
         },
       },
       {
@@ -86,21 +61,21 @@ export default function ReportScreen({ navigation }) {
     ]);
   };
 
-  const saveReport = async (lat, lng) => {
+  const saveReport = async () => {
     try {
       const issue = {
         category: selectedCategory,
         description,
         image: image || null,
         location: {
-          lat,
-          lng,
+          lat: 12.9716,
+          lng: 77.5946,
         },
       };
 
-      await addIssue(issue);
+      console.log("Saving issue:", issue);
 
-      setLoading(false);
+      await addIssue(issue);
 
       Alert.alert("Success", "Report submitted");
 
@@ -109,10 +84,12 @@ export default function ReportScreen({ navigation }) {
       setImage(null);
 
       navigation.navigate("Home");
+
     } catch (err) {
-      console.log("Firestore Error:", err);
+      console.log("SAVE ERROR:", err);
+      Alert.alert("Error", "Failed to submit report");
+    } finally {
       setLoading(false);
-      Alert.alert("Error submitting report");
     }
   };
 
@@ -124,22 +101,7 @@ export default function ReportScreen({ navigation }) {
 
     setLoading(true);
 
-    const hasLocation = await requestLocationPermission();
-
-    if (hasLocation) {
-      Geolocation.getCurrentPosition(
-        (pos) => {
-          saveReport(pos.coords.latitude, pos.coords.longitude);
-        },
-        () => {
-          // fallback Bangalore
-          saveReport(12.9716, 77.5946);
-        },
-        { enableHighAccuracy: true }
-      );
-    } else {
-      saveReport(12.9716, 77.5946);
-    }
+    await saveReport();
   };
 
   return (

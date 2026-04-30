@@ -11,7 +11,24 @@ export const addIssue = async (issue) => {
 
     return docRef.id;
   } catch (error) {
-    console.log('Firestore Error:', error);
+    console.log('Add Issue Error:', error);
     throw error;
+  }
+};
+
+export const getIssues = async () => {
+  try {
+    const snapshot = await firestore()
+      .collection('issues')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.log('Get Issues Error:', error);
+    return [];
   }
 };
