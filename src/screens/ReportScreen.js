@@ -8,10 +8,13 @@ import {
   ScrollView,
   StatusBar,
   Alert,
+  PermissionsAndroid,
+  Platform,
 } from "react-native";
 
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import Geolocation from "@react-native-community/geolocation";
 import firestore from "@react-native-firebase/firestore";
 
 import Button from "../components/Button";
@@ -26,6 +29,33 @@ const categories = [
   { id: "accident", label: "Accident", icon: "warning" },
   { id: "construction", label: "Construction", icon: "construction" },
 ];
+
+const getDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371000;
+  const toRad = (v) => (v * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const getSeverity = (category, description) => {
+  const text = description.toLowerCase();
+
+  if (category === "accident") return "high";
+  if (text.includes("huge") || text.includes("very") || text.includes("danger"))
+    return "high";
+  if (category === "traffic") return "medium";
+
+  return "low";
+};
 
 export default function ReportScreen({ navigation }) {
   const [description, setDescription] = useState("");
@@ -59,6 +89,38 @@ export default function ReportScreen({ navigation }) {
     ]);
   };
 
+  const getLocation = async () => {
+    return new Promise(async (resolve) => {
+      try {
+        if (Platform.OS === "android") {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          );
+
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            resolve({ lat: 12.9716, lng: 77.5946 });
+            return;
+          }
+        }
+
+        Geolocation.getCurrentPosition(
+          (pos) => {
+            resolve({
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+            });
+          },
+          () => {
+            resolve({ lat: 12.9716, lng: 77.5946 });
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } catch {
+        resolve({ lat: 12.9716, lng: 77.5946 });
+      }
+    });
+  };
+
   const handleSubmit = async () => {
     if (!description || !selectedCategory) {
       Alert.alert("Error", "Fill all fields");
@@ -70,30 +132,60 @@ export default function ReportScreen({ navigation }) {
     try {
       setLoading(true);
 
-      const issue = {
-        category: selectedCategory,
-        description,
-        image: image || null,
+      const loc = await getLocation();
+      const severity = getSeverity(selectedCategory, description);
 
-        location: {
-          lat: 12.9716,
-          lng: 77.5946,
-        },
-
-        status: "open",
-        severity: "medium",
-        reportCount: 1,
-        userId: "temp_user",
-      };
-
-      console.log("SUBMITTING:", issue);
-
-      await firestore()
+      const snapshot = await firestore()
         .collection("issues")
-        .add({
-          ...issue,
-          createdAt: firestore.FieldValue.serverTimestamp(),
-        });
+        .where("category", "==", selectedCategory)
+        .get();
+
+      let duplicateDoc = null;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!data.location) return;
+
+        const dist = getDistance(
+          loc.lat,
+          loc.lng,
+          data.location.lat,
+          data.location.lng
+        );
+
+        if (dist < 100) {
+          duplicateDoc = doc;
+        }
+      });
+
+      if (duplicateDoc) {
+        await firestore()
+          .collection("issues")
+          .doc(duplicateDoc.id)
+          .update({
+            reportCount: firestore.FieldValue.increment(1),
+          });
+
+        Alert.alert("Updated", "Existing issue reinforced");
+      } else {
+        await firestore()
+          .collection("issues")
+          .add({
+            category: selectedCategory,
+            description,
+            image: image || null,
+            location: loc,
+
+            status: "open",
+            severity,
+            reportCount: 1,
+            userId: "temp_user",
+
+            createdAt: firestore.FieldValue.serverTimestamp(),
+          });
+
+        Alert.alert("Success", "New issue created");
+      }
 
       setDescription("");
       setSelectedCategory(null);
@@ -102,8 +194,8 @@ export default function ReportScreen({ navigation }) {
       navigation.navigate("Home");
 
     } catch (err) {
-      console.error("SUBMIT ERROR:", err);
-      Alert.alert("Error", "Failed to submit report");
+      console.error(err);
+      Alert.alert("Error", "Submission failed");
     } finally {
       setLoading(false);
     }
@@ -116,7 +208,6 @@ export default function ReportScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.header}>Report Issue</Text>
 
-        {/* IMAGE */}
         <Card>
           <TouchableOpacity style={styles.imageBox} onPress={handleImagePick}>
             {image ? (
@@ -130,7 +221,6 @@ export default function ReportScreen({ navigation }) {
           </TouchableOpacity>
         </Card>
 
-        {/* CATEGORY */}
         <Card>
           <Text style={styles.section}>Category</Text>
           <View style={styles.grid}>
@@ -150,7 +240,6 @@ export default function ReportScreen({ navigation }) {
           </View>
         </Card>
 
-        {/* DESCRIPTION */}
         <Card>
           <Text style={styles.section}>Description</Text>
           <Input
@@ -161,7 +250,6 @@ export default function ReportScreen({ navigation }) {
         </Card>
       </ScrollView>
 
-      {/* SUBMIT */}
       <View style={styles.footer}>
         <Button
           title={loading ? "Submitting..." : "Submit Report"}
