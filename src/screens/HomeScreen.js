@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,7 @@ import {
     StyleSheet,
     ScrollView,
     StatusBar,
+    Dimensions,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getIssues } from '../services/issueService';
@@ -13,51 +14,61 @@ import { colors, spacing } from '../theme';
 import Card from '../components/Card';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 export default function HomeScreen({ navigation }) {
     const [issues, setIssues] = useState([]);
 
     useFocusEffect(
-        React.useCallback(() => {
-            loadData();
+        useCallback(() => {
+            fetchIssues();
         }, [])
     );
 
-    const loadData = async () => {
-        const data = await getIssues();
-        setIssues(data);
+    const fetchIssues = async () => {
+        try {
+            const data = await getIssues();
+            setIssues(data);
+        } catch (err) {
+            console.error("HOME FETCH ERROR:", err);
+        }
     };
 
     const stats = [
-        { label: "Total", value: issues.length, icon: "analytics" },
-        { label: "Potholes", value: issues.filter(i => i.type === "pothole").length, icon: "report-problem" },
-        { label: "Garbage", value: issues.filter(i => i.type === "garbage").length, icon: "delete" },
-        { label: "Traffic", value: issues.filter(i => i.type === "traffic").length, icon: "traffic" },
+        { label: "Potholes", value: issues.filter(i => i.category === "pothole").length, icon: "report-problem" },
+        { label: "Garbage", value: issues.filter(i => i.category === "garbage").length, icon: "delete" },
+        { label: "Traffic", value: issues.filter(i => i.category === "traffic").length, icon: "traffic" },
+        { label: "Construction", value: issues.filter(i => i.category === "construction").length, icon: "engineering" },
     ];
 
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
+            {/* HEADER */}
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.welcomeText}>Welcome to</Text>
-                    <Text style={styles.title}>UrbanLens</Text>
-                </View>
+                <Text style={styles.title}>UrbanLens</Text>
                 <TouchableOpacity
                     style={styles.profileButton}
                     onPress={() => navigation.navigate("Profile")}
                 >
-                    <Icon name="person" size={26} color={colors.primary} />
+                    <Icon name="person" size={22} color={colors.primary} />
                 </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+
+                {/* OVERVIEW */}
                 <Text style={styles.sectionTitle}>Overview</Text>
+
                 <View style={styles.statsGrid}>
                     {stats.map((item, index) => (
                         <Card key={index} style={styles.statCard}>
                             <View style={styles.statIconContainer}>
-                                <Icon name={item.icon} size={22} color={colors.primary} />
+                                <Icon name={item.icon} size={20} color={colors.primary} />
                             </View>
                             <Text style={styles.statNumber}>{item.value}</Text>
                             <Text style={styles.statLabel}>{item.label}</Text>
@@ -65,39 +76,43 @@ export default function HomeScreen({ navigation }) {
                     ))}
                 </View>
 
-                <Text style={styles.sectionTitle}>Quick Actions</Text>
+                {/* QUICK ACTIONS */}
+                <View style={styles.actionsWrapper}>
+                    <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-                <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate("Map")}
-                >
-                    <Card style={styles.actionCard}>
-                        <View style={styles.actionIconContainer}>
-                            <Icon name="map" size={28} color={colors.primary} />
-                        </View>
-                        <View style={styles.actionTextContainer}>
-                            <Text style={styles.actionTitle}>Explore Map</Text>
-                            <Text style={styles.actionDesc}>View reported issues in your area</Text>
-                        </View>
-                        <Icon name="chevron-right" size={24} color={colors.textSecondary} />
-                    </Card>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={() => navigation.navigate("Map")}
+                    >
+                        <Card style={styles.actionCard}>
+                            <View style={styles.actionIconContainer}>
+                                <Icon name="map" size={26} color={colors.primary} />
+                            </View>
+                            <View style={styles.actionTextContainer}>
+                                <Text style={styles.actionTitle}>Explore Map</Text>
+                                <Text style={styles.actionDesc}>View reported issues in your area</Text>
+                            </View>
+                            <Icon name="chevron-right" size={22} color={colors.textSecondary} />
+                        </Card>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => navigation.navigate("Report")}
-                >
-                    <Card style={styles.actionCard}>
-                        <View style={styles.actionIconContainer}>
-                            <Icon name="add-a-photo" size={28} color={colors.primary} />
-                        </View>
-                        <View style={styles.actionTextContainer}>
-                            <Text style={styles.actionTitle}>Report Issue</Text>
-                            <Text style={styles.actionDesc}>Submit a new report with photos</Text>
-                        </View>
-                        <Icon name="chevron-right" size={24} color={colors.textSecondary} />
-                    </Card>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={() => navigation.navigate("Report")}
+                    >
+                        <Card style={styles.actionCard}>
+                            <View style={styles.actionIconContainer}>
+                                <Icon name="add-a-photo" size={26} color={colors.primary} />
+                            </View>
+                            <View style={styles.actionTextContainer}>
+                                <Text style={styles.actionTitle}>Report Issue</Text>
+                                <Text style={styles.actionDesc}>Submit a new report with photos</Text>
+                            </View>
+                            <Icon name="chevron-right" size={22} color={colors.textSecondary} />
+                        </Card>
+                    </TouchableOpacity>
+                </View>
+
             </ScrollView>
         </View>
     );
@@ -108,104 +123,119 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
-    scrollContent: {
-        padding: spacing.lg,
-    },
+
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.lg,
-        paddingTop: spacing.xl,
-        paddingBottom: spacing.md,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.sm,
     },
-    welcomeText: {
-        color: colors.textSecondary,
-        fontSize: 14,
-        fontWeight: '500',
-    },
+
     title: {
-        color: colors.text,
-        fontSize: 32,
+        fontSize: 26,
         fontWeight: '800',
-        letterSpacing: -0.5,
+        color: colors.text,
     },
+
     profileButton: {
-        width: 52,
-        height: 52,
-        borderRadius: 26,
+        width: 42,
+        height: 42,
+        borderRadius: 21,
         backgroundColor: colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-        elevation: 2,
     },
+
+    scrollContent: {
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.lg,
+        minHeight: SCREEN_HEIGHT,
+    },
+
     sectionTitle: {
         color: colors.text,
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '700',
-        marginBottom: spacing.md,
-        marginTop: spacing.lg,
+        marginBottom: spacing.sm,
+        marginTop: spacing.sm,
     },
+
     statsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+        marginBottom: spacing.md,
     },
+
     statCard: {
         width: '48%',
         alignItems: 'center',
-        paddingVertical: spacing.lg,
-        marginBottom: spacing.md,
+        paddingVertical: spacing.md,
+        marginBottom: spacing.sm,
     },
+
     statIconContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         backgroundColor: colors.primaryLight,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
     },
+
     statNumber: {
-        color: colors.text,
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: '800',
+        color: colors.text,
     },
+
     statLabel: {
-        color: colors.textSecondary,
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '600',
+        color: colors.textSecondary,
         textTransform: 'uppercase',
-        letterSpacing: 0.5,
     },
+
+    actionsWrapper: {
+        flex: 1,
+        justifyContent: 'flex-start',
+    },
+
     actionCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: spacing.lg,
+        padding: spacing.md,
         marginBottom: spacing.sm,
     },
+
     actionIconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 16,
+        width: 50,
+        height: 50,
+        borderRadius: 14,
         backgroundColor: colors.primaryLight,
         justifyContent: 'center',
         alignItems: 'center',
     },
+
     actionTextContainer: {
         flex: 1,
         marginLeft: spacing.md,
     },
+
     actionTitle: {
-        color: colors.text,
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
+        color: colors.text,
     },
+
     actionDesc: {
+        fontSize: 13,
         color: colors.textSecondary,
-        fontSize: 14,
         marginTop: 2,
     },
 });
