@@ -95,7 +95,11 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.emptyText}>No reports yet</Text>
                 ) : (
                     issues.slice(0, 3).map((item) => (
-                        <View key={item.id} style={styles.issueItem}>
+                        <TouchableOpacity
+                            key={item.id}
+                            style={styles.issueItem}
+                            onPress={() => navigation.navigate("IssueDetail", { issue: item })}
+                        >
                             <Text style={styles.issueTitle}>
                                 {item.category?.toUpperCase() || "ISSUE"}
                             </Text>
@@ -107,7 +111,7 @@ export default function HomeScreen({ navigation }) {
                             <Text style={styles.issueTime}>
                                 {formatTime(item.createdAt)}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     ))
                 )}
 

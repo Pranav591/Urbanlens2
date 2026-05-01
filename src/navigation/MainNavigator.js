@@ -1,20 +1,68 @@
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import AuthStack from "./AuthStack";
-import AppTabs from "./AppTabs";
+import LoginScreen from '../screens/LoginScreen';
+import HomeScreen from '../screens/HomeScreen';
+import MapScreen from '../screens/MapScreen';
+import ReportScreen from '../screens/ReportScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import IssueDetailScreen from '../screens/IssueDetailScreen';
 
-const Stack = createNativeStackNavigator();
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function MainNavigator({ initialRoute }) {
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+function TabNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ color, size }) => {
+          let iconName;
 
-      {/* AUTH FLOW */}
-      <Stack.Screen name="Auth" component={AuthStack} />
+          if (route.name === 'Home') iconName = 'home';
+          else if (route.name === 'Map') iconName = 'map';
+          else if (route.name === 'Report') iconName = 'add-circle';
+          else if (route.name === 'Profile') iconName = 'person';
 
-      {/* MAIN APP */}
-      <Stack.Screen name="App" component={AppTabs} />
+          return <Icon name={iconName} size={size} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Report" component={ReportScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
+
+export default function MainNavigator() {
+  return (
+    <Stack.Navigator initialRouteName="Login">
+
+      {/* 🔥 LOGIN FIRST */}
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* 🔥 MAIN APP */}
+      <Stack.Screen
+        name="Main"
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
+
+      {/* 🔥 DETAIL */}
+      <Stack.Screen
+        name="IssueDetail"
+        component={IssueDetailScreen}
+        options={{ title: "Issue Details" }}
+      />
 
     </Stack.Navigator>
   );

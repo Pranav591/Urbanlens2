@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation }) {
 
     const handleGuest = async () => {
         await saveUser({ type: "guest" });
-        navigation.replace("App");
+        navigation.replace("Main");
     };
 
     return (
