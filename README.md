@@ -119,6 +119,10 @@ UrbanLens2/
 │   │   ├── issueService.js
 │   │   └── locationService.js
 │   └── theme/
+│       ├── colors.js
+│       ├── index.js
+│       ├── spacing.js
+│       └── typography.js
 ├── android/
 ├── ios/
 ├── App.js
@@ -142,7 +146,7 @@ UrbanLens2/
 ```bash
 # Clone the repo
 git clone https://github.com/Pranav591/Urbanlens2.git
-cd urbanlens
+cd Urbanlens2
 
 # Install dependencies
 npm install
@@ -166,27 +170,6 @@ Declare the following in `AndroidManifest.xml`:
 - `ACCESS_COARSE_LOCATION`
 - `READ_MEDIA_IMAGES` / `READ_EXTERNAL_STORAGE`
 - `WRITE_EXTERNAL_STORAGE`
-
----
-
-## Known Limitations
-
-- No authentication layer — all submissions use `temp_user` as the identifier
-- No role-based access control — anyone can update any issue status
-- No backend validation — data integrity enforced client-side only
-- No map marker clustering — overlapping markers handled via coordinate jitter
-- No push notifications
-
----
-
-## Roadmap
-
-- Firebase Authentication with persistent user identity
-- Cloud-synced issue database visible across devices
-- Live location tracking
-- Push notifications for nearby or high-severity reports
-- Map marker clustering for dense urban areas
-- Dark mode
 
 ---
 
