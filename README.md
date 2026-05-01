@@ -1,39 +1,96 @@
 # UrbanLens
 
-Urban infrastructure fails quietly. Potholes go unlogged, accidents get forgotten, and construction zones catch people off guard — not because no one cares, but because there's no simple way to document and surface these issues in real time. UrbanLens is an attempt to fix that.
+Urban infrastructure fails quietly. Potholes go unlogged, accidents get forgotten, construction zones catch people off guard — not because no one cares, but because there is no simple way to document and surface these issues in real time. UrbanLens fixes that.
 
-It's a React Native mobile app that lets anyone report real-world civic issues — with photo evidence, GPS coordinates, and context — and visualize them on a live map. Built offline-first, no backend required to get started.
+A React Native mobile application that lets anyone report real-world civic issues with photo evidence, GPS coordinates, and category context — then visualizes all reports on a live map. The current MVP runs entirely on-device with local persistence. No backend required to get started.
 
 ---
 
 ## Features
 
-**Authentication**  
-Login, signup, guest access, and persistent sessions via local storage.
+**Authentication**
+Login, signup, guest access, and persistent sessions via AsyncStorage.
 
-**Issue Reporting**  
-Capture a photo, pull your current GPS location, categorize the issue (pothole, traffic, accident, construction, police activity), add a title, and submit — all in under a minute.
+**Issue Reporting**
+Capture a photo, pull current GPS coordinates, select a category (pothole, garbage, traffic, accident, construction), add a description, and submit. The system checks for existing reports within a 100-meter radius before creating a new entry — matching reports increment a shared report count rather than spawning duplicates.
 
-**Map View**  
-All reported issues rendered as markers on an interactive Leaflet/OpenStreetMap map. Tap any marker to see the full report with image. Auto-focuses on the most recent submission.
+**Severity Classification**
+Severity is auto-assigned at submission based on category and description keywords. Accidents default to high, traffic incidents to medium, minor infrastructure issues to low.
 
-**Dashboard**  
-A clean summary of total reports broken down by category — useful for spotting patterns at a glance.
+**Map View**
+All reported issues rendered as interactive markers on a Leaflet and OpenStreetMap map via WebView. Markers are color-coded by category. Tap any marker to view the full report including image, description, severity, report count, and coordinates. Map auto-focuses on the most recent submission.
 
-**Profile**  
-Account info, initial-based avatar, and logout. Works for both authenticated users and guests.
+| Category     | Marker Color |
+|--------------|--------------|
+| Pothole      | Red          |
+| Garbage      | Green        |
+| Traffic      | Orange       |
+| Construction | Brown        |
+| Accident     | Black        |
+
+**Dashboard**
+Summary of total reports broken down by category with live updates via Firestore listeners. Reflects changes across devices in real time once cloud sync is active.
+
+**Issue Status Lifecycle**
+Each issue progresses through: `open` → `in_progress` → `resolved`. Status can be updated from the issue detail view, transforming the app from a passive reporting tool into an active issue management system.
+
+**Profile**
+Account info, initial-based avatar, and logout. Functional for both authenticated users and guests.
 
 ---
 
 ## Tech Stack
 
-- React Native (CLI)
-- JavaScript (ES6+)
-- AsyncStorage — local persistence
-- React Navigation
-- React Native WebView
-- Leaflet + OpenStreetMap
-- React Native Image Picker
+| Layer         | Technology                          |
+|---------------|--------------------------------------|
+| Frontend      | React Native (CLI), JavaScript ES6+  |
+| Navigation    | React Navigation                     |
+| Local Storage | AsyncStorage                         |
+| Map Rendering | Leaflet + OpenStreetMap via WebView  |
+| Camera / Media| React Native Image Picker            |
+| Database      | Firebase Firestore (NoSQL, realtime) |
+
+---
+
+## Architecture
+
+The application follows a direct client-to-database loop with no intermediate server:
+
+```
+User Action → Firestore Write → Realtime Listener → UI Update
+```
+
+Firestore serves as both the data store and the realtime event system. Key operations:
+
+```javascript
+// Submit new issue
+firestore().collection("issues").add(issue)
+
+// Listen for live updates
+firestore().collection("issues").onSnapshot(...)
+
+// Update issue status
+firestore().collection("issues").doc(id).update({ status: "resolved" })
+```
+
+Each issue document:
+
+```json
+{
+  "category": "garbage",
+  "description": "not collected since Tuesday",
+  "location": { "lat": 12.97, "lng": 77.59 },
+  "severity": "low | medium | high",
+  "status": "open | in_progress | resolved",
+  "reportCount": 1,
+  "userId": "temp_user",
+  "createdAt": "timestamp"
+}
+```
+
+**Duplicate Detection Logic**
+
+On each new report submission, the system queries existing issues within a 100-meter radius. If a match is found, it increments `reportCount` on the existing document. If no match, a new document is created. This prevents redundant entries and surfaces high-impact issues through aggregated report counts.
 
 ---
 
@@ -41,28 +98,40 @@ Account info, initial-based avatar, and logout. Works for both authenticated use
 
 ```
 UrbanLens2/
-│
 ├── src/
+│   ├── components/
 │   ├── navigation/
+│   │   ├── AppTabs.js
+│   │   ├── AuthStack.js
 │   │   └── MainNavigator.js
-│   │
 │   ├── screens/
-│   │   ├── LoginScreen.js
-│   │   ├── SignupScreen.js
 │   │   ├── ForgotPasswordScreen.js
 │   │   ├── HomeScreen.js
+│   │   ├── IssueDetailScreen.js
+│   │   ├── LoginScreen.js
 │   │   ├── MapScreen.js
+│   │   ├── ProfileScreen.js
 │   │   ├── ReportScreen.js
-│   │   └── ProfileScreen.js
-│   │
+│   │   └── SignupScreen.js
 │   ├── services/
 │   │   ├── authService.js
+│   │   ├── firestoreService.js
 │   │   ├── issueService.js
 │   │   └── locationService.js
-│
+│   └── theme/
 ├── android/
 ├── ios/
 ├── App.js
+├── app.json
+├── babel.config.js
+├── Gemfile
+├── index.js
+├── jest.config.js
+├── metro.config.js
+├── tsconfig.json
+├── .eslintrc.js
+├── .prettierrc.js
+├── .watchmanconfig
 └── package.json
 ```
 
@@ -89,7 +158,7 @@ npx react-native run-android
 
 ## Android Permissions
 
-The following permissions need to be declared in `AndroidManifest.xml`:
+Declare the following in `AndroidManifest.xml`:
 
 - `INTERNET`
 - `CAMERA`
@@ -100,14 +169,23 @@ The following permissions need to be declared in `AndroidManifest.xml`:
 
 ---
 
-## What's Next
+## Known Limitations
 
-The current version runs entirely on-device. The roadmap moves toward making reports shareable and persistent:
+- No authentication layer — all submissions use `temp_user` as the identifier
+- No role-based access control — anyone can update any issue status
+- No backend validation — data integrity enforced client-side only
+- No map marker clustering — overlapping markers handled via coordinate jitter
+- No push notifications
 
-- Firebase Authentication
-- Cloud-synced issue database (so reports are visible across devices)
+---
+
+## Roadmap
+
+- Firebase Authentication with persistent user identity
+- Cloud-synced issue database visible across devices
 - Live location tracking
-- Push notifications for nearby reports
+- Push notifications for nearby or high-severity reports
+- Map marker clustering for dense urban areas
 - Dark mode
 
 ---
