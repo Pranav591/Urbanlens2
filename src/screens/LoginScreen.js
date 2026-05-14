@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
         }
 
         await saveUser({ email, type: "user" });
-        navigation.replace("App");
+        navigation.replace("Main");
     };
 
     const handleGuest = async () => {
