@@ -100,6 +100,10 @@ On each new report submission, the system queries existing issues within a 100-m
 UrbanLens2/
 ├── src/
 │   ├── components/
+│   │   ├── Button.js
+│   │   ├── Card.js
+│   │   ├── CategoryChip.js
+│   │   └── Input.js
 │   ├── navigation/
 │   │   ├── AppTabs.js
 │   │   ├── AuthStack.js
